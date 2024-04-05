@@ -10,9 +10,9 @@ $DNDomainName = ""
 $NameElements | ForEach-Object {$DNDomainName += "DC=$_,"}
 $DNDomainName = $DNDomainName -Replace ",$"
 
-#region Firewall ##########################
-New-NetFirewallRule -DisplayName "Allow From vNet" -Direction "Inbound" -Action "Allow" -Protocol "Any" -LocalPort "Any" -RemoteAddress "10.0.0.0/16"
-#endregion
+# Check whether the domain exists
+Try {$DomainCheck = Get-ADDomain $DomainName}
+Catch {Write-Error "$DomainName domain not found"}
 
 #endregion
 #region Organizational Units ##########################
@@ -192,7 +192,7 @@ ForEach ($User in $Users) {
         Set-ADUser $User.Name -Enabled $True
     }
     Catch {
-        Write-Host "$($User.displayName) Already Exists"
+        Write-Error $_
     }
 }
 
@@ -233,7 +233,7 @@ ForEach ($Group in $Groups) {
     Try {
         New-ADGroup $Group.Name -SamAccountName $Group.Name -Description $Group.description -GroupCategory Security -GroupScope Global `
             -Path $Group.OU
-    } Catch { Write-Host "Group $($Group.Name) Already Exist" }
+    } Catch { Write-Error $_ }
 }
 
 Add-ADGroupMember "Domain Admins" -Members (Get-ADUser -Filter {samAccountName -like "*-DA"}).SamAccountName
