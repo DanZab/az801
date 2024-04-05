@@ -1,6 +1,14 @@
 #region DC Config ###########################
 Set-TimeZone -Name "Eastern Standard Time"
-$DomainName = Read-Host "Enter your domain name (in 'DC=domain,DC=local' format)"
+$DomainName = Read-Host "Enter your domain name (in 'domain.local' format)"
+
+$NameElements = $DomainName -Split "\."
+If($NameElements.Count -le 1) {Write-Error "Must use an FQDN format for domain name (domain.local)"}
+
+# Build domain name in DN Format
+$DNDomainName = ""
+$NameElements | ForEach-Object {$DNDomainName += "DC=$_,"}
+$DNDomainName = $DNDomainName -Replace ",$"
 
 #region Firewall ##########################
 New-NetFirewallRule -DisplayName "Allow From vNet" -Direction "Inbound" -Action "Allow" -Protocol "Any" -LocalPort "Any" -RemoteAddress "10.0.0.0/16"
@@ -20,24 +28,17 @@ ForEach ($OU in $OUs) {
     New-ADOrganizationalUnit -Name $OU -Path "$DomainName"
 }
 
-New-ADOrganizationalUnit -Name "Admins" -Path "OU=People,$DomainName"
-New-ADOrganizationalUnit -Name "Security" -Path "OU=Groups,$DomainName"
-New-ADOrganizationalUnit -Name "Application" -Path "OU=Groups,$DomainName"
-New-ADOrganizationalUnit -Name "File Share" -Path "OU=Groups,$DomainName"
-New-ADOrganizationalUnit -Name "RBAC" -Path "OU=Groups,$DomainName"
+New-ADOrganizationalUnit -Name "Admins" -Path "OU=People,$DNDomainName"
+New-ADOrganizationalUnit -Name "Security" -Path "OU=Groups,$DNDomainName"
+New-ADOrganizationalUnit -Name "Application" -Path "OU=Groups,$DNDomainName"
+New-ADOrganizationalUnit -Name "File Share" -Path "OU=Groups,$DNDomainName"
+New-ADOrganizationalUnit -Name "RBAC" -Path "OU=Groups,$DNDomainName"
 
 #endregion
 
-#region DNS Settings ##########################
-# Reverse Lookup Zones
-Add-DnsServerPrimaryZone -NetworkID "10.0.0.0/24" -ReplicationScope "Forest"
-Add-DnsServerPrimaryZone -NetworkID "10.0.1.0/24" -ReplicationScope "Forest"
-Add-DnsServerPrimaryZone -NetworkID "10.0.2.0/24" -ReplicationScope "Forest"
-
-#endregion
 
 #region Users ##########################
-$SuperSecurePassword = (Read-Host -AsSecureString 'AccountPassword')
+$SuperSecurePassword = (Read-Host -AsSecureString "AccountPassword")
 $Users = @(
     @{
         name = "svc_adjoin"
@@ -157,31 +158,31 @@ ForEach ($User in $Users) {
             "ServiceAcct" {
                 New-ADUser -name $User.Name `
                     -SamAccountName $User.Name `
-				    -UserPrincipalName "$($User.Name)@dzab.local" `
+				    -UserPrincipalName "$($User.Name)@$DomainName" `
                     -DisplayName $User.displayname `
                     -AccountPassword $SuperSecurePassword `
-                    -Path 'OU=Resources,$DomainName' `
+                    -Path "OU=Resources,$DNDomainName" `
                     -CannotChangePassword $true -PasswordNeverExpires $true
             }
             "User" {
                 New-ADUser -name $User.Name `
                     -SamAccountName $User.Name `
-				    -UserPrincipalName "$($User.Name)@dzab.local" `
+				    -UserPrincipalName "$($User.Name)@$DomainName" `
                     -GivenName $User.first `
                     -Surname $User.last `
                     -DisplayName $User.displayname `
                     -AccountPassword $SuperSecurePassword `
-                    -Path 'OU=People,$DomainName'
+                    -Path "OU=People,$DNDomainName"
             }
             "Admin" {
                 New-ADUser -name $User.Name `
                     -SamAccountName $User.Name `
-				    -UserPrincipalName "$($User.Name)@dzab.local" `
+				    -UserPrincipalName "$($User.Name)@$DomainName" `
                     -GivenName $User.first `
                     -Surname $User.last `
                     -DisplayName $User.displayname `
                     -AccountPassword $SuperSecurePassword `
-                    -Path 'OU=Admins,OU=People,$DomainName'
+                    -Path "OU=Admins,OU=People,$DNDomainName"
                 If ($User.Name -like "*_DA") {
                     Add-ADGroupMember "Domain Admins" -Members $User.Name
                 }
@@ -203,27 +204,27 @@ ForEach ($User in $Users) {
 $Groups = @(
     @{
         name = "SEC-ServerAdmins"
-        OU = "OU=Security,OU=Groups,$DomainName"
+        OU = "OU=Security,OU=Groups,$DNDomainName"
         description = "Users with Admin permissions on Servers"
     },
 	@{
         name = "SEC-RODCDelegatedAdmins"
-        OU = "OU=Security,OU=Groups,$DomainName"
+        OU = "OU=Security,OU=Groups,$DNDomainName"
         description = "Users with Delegated Admin Permissions on RODCs"
     },
 	@{
         name = "FS-DFS-IT-RW"
-        OU = "OU=File Share,OU=Groups,$DomainName"
-        description = "Read/Write on \\dzab.local\IT$"
+        OU = "OU=File Share,OU=Groups,$DNDomainName"
+        description = "Read/Write on \\$DomainName\IT$"
     },
 	@{
         name = "APP-BackupUtil-User"
-        OU = "OU=Application,OU=Groups,$DomainName"
+        OU = "OU=Application,OU=Groups,$DNDomainName"
         description = "Login to BackupUtil"
     },
 	@{
         name = "APP-BackupUtil-Admin"
-        OU = "OU=Application,OU=Groups,$DomainName"
+        OU = "OU=Application,OU=Groups,$DNDomainName"
         description = "Admin rights in BackupUtil"
     }
 )
@@ -246,11 +247,11 @@ Add-ADGroupMember "SEC-ServerAdmins" -Members (Get-ADUser -Filter {samAccountNam
 $Servers = @("MGMT-P1", "RODC-P1","WEB-P1","APP-P1")
 ForEach ($Server in $Servers) {
     $Check = Get-ADComputer $Server
-    If ($Check) {Move-ADObject $Check -TargetPath "OU=Servers,$DomainName"}
+    If ($Check) {Move-ADObject $Check -TargetPath "OU=Servers,$DNDomainName"}
 }
 $Workstations = @("RODC-CLIENT")
 ForEach ($Workstation in $Workstations) {
     $Check = Get-ADComputer $Workstation
-    If ($Check) {Move-ADObject $Check -TargetPath "OU=Workstations,$DomainName"}
+    If ($Check) {Move-ADObject $Check -TargetPath "OU=Workstations,$DNDomainName"}
 }
 #endregion
