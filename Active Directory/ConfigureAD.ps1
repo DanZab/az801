@@ -183,9 +183,6 @@ ForEach ($User in $Users) {
                     -DisplayName $User.displayname `
                     -AccountPassword $SuperSecurePassword `
                     -Path "OU=Admins,OU=People,$DNDomainName"
-                If ($User.Name -like "*_DA") {
-                    Add-ADGroupMember "Domain Admins" -Members $User.Name
-                }
             }
         }
 
@@ -248,6 +245,35 @@ $Servers = @("MGMT-P1", "RODC-P1","WEB-P1","APP-P1")
 ForEach ($Server in $Servers) {
     $Check = Get-ADComputer $Server
     If ($Check) {Move-ADObject $Check -TargetPath "OU=Servers,$DNDomainName"}
+}
+$Workstations = @("RODC-CLIENT")
+ForEach ($Workstation in $Workstations) {
+    $Check = Get-ADComputer $Workstation
+    If ($Check) {Move-ADObject $Check -TargetPath "OU=Workstations,$DNDomainName"}
+}
+#endregion
+
+#region Group Policies ##########################
+# The domain ext specifies the OU so they don't need to be pre-created
+# Creating them here will cause the extension to fail
+$GPOs = @(
+    @{
+        Name = "Server-Admins"
+        OU = "OU=Servers,$DNDomainName"
+    },
+    @{
+        Name = "Domain-RDP"
+        OU = "$DNDomainName"
+    },
+    @{
+        Name = "Domain-Firewall",
+        OU = "$DNDomainName"
+    }
+)
+ForEach ($GPO in $GPOs) {
+    New-GPO -Name $GPO.Name
+    Import-GPO -Path 
+    New-GPLink -Target $GPO.OU
 }
 $Workstations = @("RODC-CLIENT")
 ForEach ($Workstation in $Workstations) {
