@@ -4,6 +4,15 @@ configuration CreateADPDC
     ( 
         [Parameter(Mandatory)]
         [String]$DomainName,
+        
+        [Parameter(Mandatory)]
+        [String]$DomainDN,
+
+        [Parameter(Mandatory=$false)]
+        [String]$GPORepo="https://github.com/DanZab/az801/archive/refs/tags/v0.1.0.zip",
+        
+        [Parameter(Mandatory=$false)]
+        [String]$GPODirector="Active Directory/GPOs",
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
@@ -16,7 +25,7 @@ configuration CreateADPDC
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
     $Interface = Get-NetAdapter | Where Name -Like "Ethernet*" | Select-Object -First 1
     $InterfaceAlias = $($Interface.Name)
-    $DomainRoot = "DC=dzab,DC=local"
+    $DomainRoot = $DomainDN
 
     $RootOUs = @(
         "Workstations",
@@ -52,14 +61,14 @@ configuration CreateADPDC
         @{name = "NGreene-DA";first = "Noah";Last = "Greene";displayname = "(DA) Noah Greene"}
     )
     $Groups = @(
-        @{name = "SEC-ServerAdmins";OU = "OU=Security,OU=Groups,DC=dzab,DC=local";description = "Users with Admin permissions on Servers";members = ($AdminUsers | Where-Object {$_.name -like "*-ADM"}).name},
-        @{name = "SEC-RODCDelegatedAdmins";OU = "OU=Security,OU=Groups,DC=dzab,DC=local";description = "Users with Delegated Admin Permissions on RODCs";members = @()},
-        @{name = "FS-DFS-IT-RW";OU = "OU=File Share,OU=Groups,DC=dzab,DC=local";description = "Read/Write on \\dzab.local\IT$";members = @()},
-        @{name = "APP-BackupUtil-User";OU = "OU=Application,OU=Groups,DC=dzab,DC=local";description = "Login to BackupUtil";members = @()},
-        @{name = "APP-BackupUtil-Admin";OU = "OU=Application,OU=Groups,DC=dzab,DC=local";description = "Admin rights in BackupUtil";members = @()}
+        @{name = "SEC-ServerAdmins";OU = "OU=Security,OU=Groups,$DomainRoot";description = "Users with Admin permissions on Servers";members = ($AdminUsers | Where-Object {$_.name -like "*-ADM"}).name},
+        @{name = "SEC-RODCDelegatedAdmins";OU = "OU=Security,OU=Groups,$DomainRoot";description = "Users with Delegated Admin Permissions on RODCs";members = @()},
+        @{name = "FS-DFS-IT-RW";OU = "OU=File Share,OU=Groups,$DomainRoot";description = "Read/Write on \\$DomainName\IT$";members = @()},
+        @{name = "APP-BackupUtil-User";OU = "OU=Application,OU=Groups,$DomainRoot";description = "Login to BackupUtil";members = @()},
+        @{name = "APP-BackupUtil-Admin";OU = "OU=Application,OU=Groups,$DomainRoot";description = "Admin rights in BackupUtil";members = @()}
     )
     [array]$DomainAdmins = ($AdminUsers | Where-Object {$_.name -like "*-DA"}).name
-    $DomainAdmins += "dzabinski-da"
+    $DomainAdmins += $Admincreds.UserName
 
     Node localhost
     {
@@ -219,13 +228,13 @@ configuration CreateADPDC
             }
         }
 
-        xADUser DZabinskiDA
+        xADUser AdminUser
         {
             DomainName                    = $DomainName
             Ensure                        = "Present"
             DomainAdministratorCredential = $DomainCreds
             DependsOn                     = "[xADOrganizationalUnit]Admins"
-            UserName                      = "DZabinski-DA"
+            UserName                      = "$($Admincreds.UserName)"
             Path                          = "OU=Admins,OU=People,$DomainRoot"
         }
 
@@ -250,6 +259,41 @@ configuration CreateADPDC
             DependsOn   = @("[xWaitForADDomain]DscForestWait","[xADUser]$($AdminUsers[-1].name)")
             GroupName   = "Domain Admins"
             Members     = $DomainAdmins
+        }
+
+        Script GPOs
+        {
+            SetScript  = {
+                $Path = "C:\Temp\AZ801Files"
+                New-Item -Path $Path -ItemType Directory -Force
+                Invoke-WebRequest "$using:GPORepo" -UseBasicParsing -Outfile "$Path.zip"
+                Expand-Archive -LiteralPath "$Path.zip" -DestinationPath $Path -Force
+                $Dir = Get-ChildItem $Path -Directory -Name
+                $GPODirectory = "$Path\$Dir\$using:GPODirectory"
+
+                $GPOs = @(
+                    @{
+                        Name = "Server-Admins"
+                        OU = "OU=Servers,$DNDomainName"
+                    },
+                    @{
+                        Name = "Domain-RDP"
+                        OU = "$DNDomainName"
+                    },
+                    @{
+                        Name = "Domain-Firewall"
+                        OU = "$DNDomainName"
+                    }
+                )
+                ForEach ($GPO in $GPOs) {
+                    New-GPO -Name $GPO.Name
+                    Import-GPO -Path $GPODirectory -BackupGpoName $GPO.Name -TargetName $GPO.Name
+                    New-GPLink -Name $GPO.Name -Target $GPO.OU
+                }
+            }
+            GetScript  = { @{} }
+            TestScript = { $false }
+            DependsOn  = @("[xWaitForADDomain]DscForestWait","[xADOrganizationalUnit]$($RootOUs[-1])")
         }
     }
 }

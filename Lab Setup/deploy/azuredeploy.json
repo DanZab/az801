@@ -27,6 +27,12 @@
         "description": "The FQDN of the Active Directory Domain to be created"
       }
     },
+    "domainDN": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the Active Directory Domain to be created"
+      }
+    },
     "dnsPrefix": {
       "type": "string",
       "metadata": {
@@ -331,7 +337,8 @@
             "AdminCreds": {
               "UserName": "[parameters('adminUsername')]",
               "Password": "PrivateSettingsRef:AdminPassword"
-            }
+            },
+            "DomainDN": "[parameters('domainDN')]"
           }
         },
         "protectedSettings": {

@@ -8,6 +8,9 @@ param adminPassword string
 @description('The FQDN of the Active Directory Domain to be created')
 param domainName string
 
+@description('The DN of the Active Directory Domain to be created')
+param domainDN string
+
 @description('The DNS prefix for the public IP address used by the Load Balancer')
 param dnsPrefix string
 
@@ -242,6 +245,7 @@ resource createADForest 'Microsoft.Compute/virtualMachines/extensions@2022-08-01
           UserName: adminUsername
           Password: 'PrivateSettingsRef:AdminPassword'
         }
+        DomainDN: domainDN
       }
     }
     protectedSettings: {
