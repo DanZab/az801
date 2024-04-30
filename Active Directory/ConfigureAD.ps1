@@ -25,7 +25,7 @@ $OUs = @(
 )
 
 ForEach ($OU in $OUs) {
-    New-ADOrganizationalUnit -Name $OU -Path "$DomainName"
+    New-ADOrganizationalUnit -Name $OU -Path "$DNDomainName"
 }
 
 New-ADOrganizationalUnit -Name "Admins" -Path "OU=People,$DNDomainName"
@@ -238,24 +238,15 @@ Add-ADGroupMember "SEC-ServerAdmins" -Members (Get-ADUser -Filter {samAccountNam
 
 #endregion
 
-#region Computers ##########################
-# The domain ext specifies the OU so they don't need to be pre-created
-# Creating them here will cause the extension to fail
-$Servers = @("MGMT-P1", "RODC-P1","WEB-P1","APP-P1")
-ForEach ($Server in $Servers) {
-    $Check = Get-ADComputer $Server
-    If ($Check) {Move-ADObject $Check -TargetPath "OU=Servers,$DNDomainName"}
-}
-$Workstations = @("RODC-CLIENT")
-ForEach ($Workstation in $Workstations) {
-    $Check = Get-ADComputer $Workstation
-    If ($Check) {Move-ADObject $Check -TargetPath "OU=Workstations,$DNDomainName"}
-}
-#endregion
-
 #region Group Policies ##########################
-# The domain ext specifies the OU so they don't need to be pre-created
-# Creating them here will cause the extension to fail
+#Download GPOs and Extract
+$Path = "C:\Temp\AZ801Files"
+New-Item -Path $Path -ItemType Directory -Force
+Invoke-WebRequest "https://github.com/DanZab/az801/archive/refs/tags/v0.1.0.zip" -UseBasicParsing -Outfile "$Path.zip"
+Expand-Archive -LiteralPath "$Path.zip" -DestinationPath $Path -Force
+$Dir = Get-ChildItem $Path -Directory -Name
+$GPODirectory = "$Path\$Dir\Active Directory\GPOs"
+
 $GPOs = @(
     @{
         Name = "Server-Admins"
@@ -266,18 +257,13 @@ $GPOs = @(
         OU = "$DNDomainName"
     },
     @{
-        Name = "Domain-Firewall",
+        Name = "Domain-Firewall"
         OU = "$DNDomainName"
     }
 )
 ForEach ($GPO in $GPOs) {
     New-GPO -Name $GPO.Name
-    Import-GPO -Path 
-    New-GPLink -Target $GPO.OU
-}
-$Workstations = @("RODC-CLIENT")
-ForEach ($Workstation in $Workstations) {
-    $Check = Get-ADComputer $Workstation
-    If ($Check) {Move-ADObject $Check -TargetPath "OU=Workstations,$DNDomainName"}
+    Import-GPO -Path $GPODirectory -BackupGpoName $GPO.Name -TargetName $GPO.Name
+    New-GPLink -Name $GPO.Name -Target $GPO.OU
 }
 #endregion
