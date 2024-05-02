@@ -33,12 +33,6 @@
         "description": "The FQDN of the Active Directory Domain to be created"
       }
     },
-    "dnsPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "The DNS prefix for the public IP address used by the Load Balancer"
-      }
-    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_D2s_v3",
@@ -89,27 +83,6 @@
         "description": "Virtual network address range."
       }
     },
-    "loadBalancerFrontEndIPName": {
-      "type": "string",
-      "defaultValue": "LBFE",
-      "metadata": {
-        "description": "Load balancer front end IP address name."
-      }
-    },
-    "backendAddressPoolName": {
-      "type": "string",
-      "defaultValue": "LBBE",
-      "metadata": {
-        "description": "Backend address pool name."
-      }
-    },
-    "inboundNatRulesName": {
-      "type": "string",
-      "defaultValue": "adRDP",
-      "metadata": {
-        "description": "Inbound NAT rules name."
-      }
-    },
     "networkInterfaceName": {
       "type": "string",
       "defaultValue": "adNic",
@@ -137,95 +110,9 @@
       "metadata": {
         "description": "Subnet IP range."
       }
-    },
-    "publicIPAddressName": {
-      "type": "string",
-      "defaultValue": "adPublicIP",
-      "metadata": {
-        "description": "Subnet IP range."
-      }
-    },
-    "availabilitySetName": {
-      "type": "string",
-      "defaultValue": "adAvailabiltySet",
-      "metadata": {
-        "description": "Availability set name."
-      }
-    },
-    "loadBalancerName": {
-      "type": "string",
-      "defaultValue": "adLoadBalancer",
-      "metadata": {
-        "description": "Load balancer name."
-      }
     }
   },
   "resources": [
-    {
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2022-07-01",
-      "name": "[parameters('publicIPAddressName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "Static",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsPrefix')]"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/availabilitySets",
-      "apiVersion": "2022-08-01",
-      "name": "[parameters('availabilitySetName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "platformUpdateDomainCount": 20,
-        "platformFaultDomainCount": 2
-      },
-      "sku": {
-        "name": "Aligned"
-      }
-    },
-    {
-      "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2022-07-01",
-      "name": "[parameters('loadBalancerName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "[parameters('loadBalancerFrontEndIPName')]",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[parameters('backendAddressPoolName')]"
-          }
-        ],
-        "inboundNatRules": [
-          {
-            "name": "[parameters('inboundNatRulesName')]",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('loadBalancerName'), parameters('loadBalancerFrontEndIPName'))]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 3389,
-              "backendPort": 3389,
-              "enableFloatingIP": false
-            }
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-      ]
-    },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2022-07-01",
@@ -240,23 +127,12 @@
               "privateIPAddress": "[parameters('privateIPAddress')]",
               "subnet": {
                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancerName'), parameters('backendAddressPoolName'))]"
-                }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('loadBalancerName'), parameters('inboundNatRulesName'))]"
-                }
-              ]
+              }
             }
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
         "[resourceId('Microsoft.Resources/deployments', 'VNet')]"
       ]
     },
@@ -268,9 +144,6 @@
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
-        },
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
         },
         "osProfile": {
           "computerName": "[parameters('virtualMachineName')]",
@@ -314,8 +187,6 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]",
-        "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
       ]
     },

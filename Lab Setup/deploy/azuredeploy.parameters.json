@@ -13,9 +13,6 @@
     },
     "domainDN": {
       "value": "DC=mydomain,DC=local"
-    },
-    "dnsPrefix": {
-      "value": "GEN-UNIQUE"
     }
   }
 }

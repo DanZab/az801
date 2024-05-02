@@ -30,7 +30,6 @@ locals {
   dsc_content_location = "https://raw.githubusercontent.com/DanZab/az801/main/Lab%20Setup/deploy/azuredeploy.json"
   domain_name          = "domain.local"
   domain_dn            = "DC=domain,DC=local" # Used in server deployments extension
-  dns_prefix           = "domainlocal"
   DC_name              = "AD-P1" # The name of the Domain Controller for AD
   DC_ipaddress         = "10.0.0.4"
   DC_vm_size           = "Standard_B2s"
@@ -40,6 +39,8 @@ locals {
   vnet_range           = "10.0.0.0/16"
   snet_name            = "snet-ad"
   snet_range           = "10.0.0.0/24"
+  # template_name        = "deploy-template"
+  # template_version     = "v1.0.0"
 
   public_ip = "${chomp(data.http.myip.response_body)}/32"
   #public_ip = "${chomp(var.public_ip)}/32"
@@ -49,6 +50,7 @@ locals {
 # contain the following:
 # - A block that gets your current IP address (can be replaced with a variable)
 # - A public IP to connect to
+
 # - An NSG to restrict access
 # - A rule for the NSG which only allows access from your current IP address
 
@@ -93,6 +95,6 @@ resource "azurerm_network_security_rule" "from_source" {
 
 # This links the NSG to the first server in your local.servers variable
 resource "azurerm_network_interface_security_group_association" "rdp_nsg" {
-  network_interface_id      = module.servers[local.servers[keys(local.servers)[0]]].network_interface_id
+  network_interface_id      = module.servers["${keys(local.servers)[0]}"].network_interface_id
   network_security_group_id = azurerm_network_security_group.rdp.id
 }
