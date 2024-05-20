@@ -1,4 +1,6 @@
 # Secure a hybrid Active Directory infrastructure 
+Back to [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) index.
+
 **Exam Objectives**
 - Configure password policies
 	- Default Domain Policy
@@ -15,13 +17,13 @@
 - Implement and manage Microsoft Defender for Identity
 
 **Videos**
-[AZ-801 Secure AD (1/7): Password Policies](https://youtu.be/9SenazZr7kw)
-[AZ-801 Secure AD (2/7): Manage Built-In Admin Groups](https://youtu.be/iuNaV4xlrRc)
-[AZ-801 Secure AD (3/7): AD Delegation](https://youtu.be/zwhMyELTH0Q)
-[AZ-801 Secure AD (4/7): Protected Users](https://youtu.be/5jdYDLM2fBo)
-[AZ-801 Secure AD (5/7): Authentication Policies and Silos](https://youtu.be/6clJfHTmi2Q)
-[AZ-801 Secure AD (6/7): Managing RODCs - Part 1](https://youtu.be/HiSDElIBg44)
-[AZ-801 Secure AD (7/7): Managing RODCs - Part 2](https://youtu.be/8_4Wqz-3IK8)
+- [AZ-801 Secure AD (1/7): Password Policies](https://youtu.be/9SenazZr7kw)
+- [AZ-801 Secure AD (2/7): Manage Built-In Admin Groups](https://youtu.be/iuNaV4xlrRc)
+- [AZ-801 Secure AD (3/7): AD Delegation](https://youtu.be/zwhMyELTH0Q)
+- [AZ-801 Secure AD (4/7): Protected Users](https://youtu.be/5jdYDLM2fBo)
+- [AZ-801 Secure AD (5/7): Authentication Policies and Silos](https://youtu.be/6clJfHTmi2Q)
+- [AZ-801 Secure AD (6/7): Managing RODCs - Part 1](https://youtu.be/HiSDElIBg44)
+- [AZ-801 Secure AD (7/7): Managing RODCs - Part 2](https://youtu.be/8_4Wqz-3IK8)
 
 ## Lab Setup
 You can use the default lab configuration for most content:

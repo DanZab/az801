@@ -1,4 +1,6 @@
 # Secure Windows Server operating system
+Back to [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) index.
+
 **Exam Objectives**
 - Configure and manage Exploit Protection
 - Configure and manage Windows Defender Application Control
