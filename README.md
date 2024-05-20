@@ -4,6 +4,9 @@ This repo contains the scripts and deployment files I use to manage the lab envi
 
 ## Contents
 
+## Guided Labs
+The [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) page is in progress, but contains some walkthroughs you can use as you're studying for the AZ-801 to teach yourself the exam objectives.
+
 ### Configuration Scripts
 - **Active Directory** contains a script you can use to populate a blank AD domain. It creates OUs, Groups, Users and some default GPOs
 - **Failover Clusters** contains a script to configure a server as a host for iSCSI drives and then a second that can be used on your nodes to connect to them
