@@ -1,4 +1,6 @@
 # Guided Labs Section
+Back to [Home Page](https://github.com/DanZab/az801)
+
 This section contains walkthroughs that map AZ-801 exam objectives to steps that can be performed on Windows Server in the lab environment you can deploy.
 
 You should be able to use the Lab Setup in this repo to configure your lab environment, instructions for doing so can be found in this video: [Instant Active Directory Lab in Azure: Step-by-Step (Part 2)](https://youtu.be/dlGQxzPiXsk)
