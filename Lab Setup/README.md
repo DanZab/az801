@@ -12,8 +12,8 @@ See the following video for instructions on how to deploy the lab environment: [
 3. (Optional) Add additional servers to the `servers` variable in the `servers.tf` file
 4. [Authenticate Terraform to Azure](https://learn.microsoft.com/en-us/azure/developer/terraform/authenticate-to-azure?tabs=bash)
 5. From the "Lab Setup" directory deploy the resources using Terraform via cli:
-  1. `terraform init`
-  2. `terraform plan`
-  3. `terraform apply`
+    1. `terraform init`
+    2. `terraform plan`
+    3. `terraform apply`
 6. (Optional) Use the [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) to study for AZ-801 objectives.
 7. When finished studying, use `terraform destroy` to delete the Azure resources so you aren't charged when not using them.
