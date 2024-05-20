@@ -9,7 +9,7 @@ The instructions for these Guided Labs are intended to be vague. You should atte
 
 Each lab includes a description of the study guide content that is covered, as well as the recommended server configuration to deploy.
 
-## Adding additional servers to your lab environment
+#### Adding additional servers to your lab environment
 It is assumed that you are deploying your lab using the [Lab Setup](https://github.com/DanZab/az801/tree/main/Lab%20Setup) in this repo, if any of the guided labs require additional servers, I'll add a server block you can copy/paste to configure the additional servers. 
 
 This server block should be added to the `servers` variable in the `servers.tf` ([link](https://github.com/DanZab/az801/blob/main/Lab%20Setup/servers.tf)) file. The block would be added here:
@@ -22,7 +22,7 @@ locals {
   }
 }
 ```
-
-## Secure Windows Server on-premises and hybrid infrastructures (25–30%)
+## Labs by Exam Topic
+### Secure Windows Server on-premises and hybrid infrastructures (25–30%)
 - [Secure a hybrid Active Directory infrastructure](./secure-hybrid-ad/)
 - [Secure Windows Server Operating System](./secure-windows-server/)
