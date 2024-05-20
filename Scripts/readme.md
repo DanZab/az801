@@ -3,6 +3,7 @@ Back to [Home Page](https://github.com/DanZab/az801)
 
 Contains scripts that can be used to configure elements of the Lab Environment. The [Active Directory scripts](https://github.com/DanZab/az801/tree/main/Active%20Directory) are in their own folder because that content is referenced by the Terraform deployment in the [Lab Setup](https://github.com/DanZab/az801/tree/main/Lab%20Setup).
 
+## General
 ### Mgmt-InstallRSAT.ps1
 Used to install RSAT tools on the Management Server (MGMT-P1)
 
