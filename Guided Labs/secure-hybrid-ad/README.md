@@ -46,7 +46,7 @@ RODC-P1 = {
 ```
 
 ## Lab Steps
-1. From the Management Server, run the [ConfigureManagement.ps1](https://github.com/DanZab/az801/blob/main/Management/ConfigureManagement.ps1) script to install RSAT tools.
+1. From the Management Server, run the [Mgmt-InstallRSAT.ps1](https://github.com/DanZab/az801/blob/main/Scipts/Mgmt-InstallRSAT.ps1) script to install RSAT tools.
 
 ### Managing Password Settings
 Password block lists are configured in Azure, this is a licensed feature that can't be covered in this lab so you will want to review the documentation: [Entra Password Protection](https://learn.microsoft.com/en-us/entra/identity/authentication/concept-password-ban-bad)
@@ -101,11 +101,11 @@ Read and understand the protections applied to the group: [Protected Users Secur
 6. Restart both servers
 7. Create an Authentication Policy that sets the TGT lifetime for Users to 120 minutes
 8. Create an Authentication Policy Silo (make sure it's set to enforced).
-   1. Add the users you identified in Step 1, and the Domain Controller computer object.
-   2. Select the Authentication Policy you created in Step 7
+    1. Add the users you identified in Step 1, and the Domain Controller computer object.
+    2. Select the Authentication Policy you created in Step 7
 9. Go back to the Authentication Policy you create in Step 7 and set the condition under "User Sign On" to only apply if the `User.AuthenticationSilo Equals (your Silo name from step 8)`.
-9. Link the Authentication Policy Silo to each user and the domain controller you selected in Step 8-1 
-10. Disconnect from your RDP session to the Management server and attempt to log in using one of the users from Step 1. This should be now be blocked due to the Auth Silo.
+10. Link the Authentication Policy Silo to each user and the domain controller you selected in Step 8-1 
+11. Disconnect from your RDP session to the Management server and attempt to log in using one of the users from Step 1. This should be now be blocked due to the Auth Silo.
 
 - Manage account security on an RODC
 - Implement and manage Microsoft Defender for Identity

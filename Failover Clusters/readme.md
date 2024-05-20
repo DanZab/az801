@@ -1,3 +1,0 @@
-# Failover Clusters
-
-This folder contains scripts I used in my YouTube video for creating clusters. One is used to configure shared storage using virtual disks and iSCSI, the second is to install the File Server role and configure the extra rules needed to allow an Azure Internal Load Balancer to distribute traffic for a File Server role, the blog post I followed for that is [here](https://learn.microsoft.com/en-us/archive/blogs/askcore/building-windows-server-failover-cluster-on-azure-iaas-vm-part-2-network-and-creation).
