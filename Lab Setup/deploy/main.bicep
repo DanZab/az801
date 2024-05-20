@@ -11,9 +11,6 @@ param domainName string
 @description('The DN of the Active Directory Domain to be created')
 param domainDN string
 
-@description('The DNS prefix for the public IP address used by the Load Balancer')
-param dnsPrefix string
-
 @description('Size of the VM for the controller')
 param vmSize string = 'Standard_D2s_v3'
 
@@ -37,15 +34,6 @@ param virtualNetworkName string = 'adVNET'
 @description('Virtual network address range.')
 param virtualNetworkAddressRange string = '10.0.0.0/16'
 
-@description('Load balancer front end IP address name.')
-param loadBalancerFrontEndIPName string = 'LBFE'
-
-@description('Backend address pool name.')
-param backendAddressPoolName string = 'LBBE'
-
-@description('Inbound NAT rules name.')
-param inboundNatRulesName string = 'adRDP'
-
 @description('Network interface name.')
 param networkInterfaceName string = 'adNic'
 
@@ -58,38 +46,6 @@ param subnetName string = 'adSubnet'
 @description('Subnet IP range.')
 param subnetRange string = '10.0.0.0/24'
 
-@description('Subnet IP range.')
-param publicIPAddressName string = 'adPublicIP'
-
-@description('Availability set name.')
-param availabilitySetName string = 'adAvailabiltySet'
-
-@description('Load balancer name.')
-param loadBalancerName string = 'adLoadBalancer'
-
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2022-07-01' = {
-  name: publicIPAddressName
-  location: location
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    dnsSettings: {
-      domainNameLabel: dnsPrefix
-    }
-  }
-}
-
-resource availabilitySet 'Microsoft.Compute/availabilitySets@2022-08-01' = {
-  location: location
-  name: availabilitySetName
-  properties: {
-    platformUpdateDomainCount: 20
-    platformFaultDomainCount: 2
-  }
-  sku: {
-    name: 'Aligned'
-  }
-}
-
 module VNet 'nestedtemplates/vnet.bicep' = {
   scope: resourceGroup()
   name: 'VNet'
@@ -99,42 +55,6 @@ module VNet 'nestedtemplates/vnet.bicep' = {
     subnetName: subnetName
     subnetRange: subnetRange
     location: location
-  }
-}
-
-resource loadBalancer 'Microsoft.Network/loadBalancers@2022-07-01' = {
-  name: loadBalancerName
-  location: location
-  properties: {
-    frontendIPConfigurations: [
-      {
-        name: loadBalancerFrontEndIPName
-        properties: {
-          publicIPAddress: {
-            id: publicIPAddress.id
-          }
-        }
-      }
-    ]
-    backendAddressPools: [
-      {
-        name: backendAddressPoolName
-      }
-    ]
-    inboundNatRules: [
-      {
-        name: inboundNatRulesName
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', loadBalancerName, loadBalancerFrontEndIPName)
-          }
-          protocol: 'Tcp'
-          frontendPort: 3389
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-    ]
   }
 }
 
@@ -151,23 +71,12 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-07-01' = {
           subnet: {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetworkName, subnetName)
           }
-          loadBalancerBackendAddressPools: [
-            {
-              id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', loadBalancerName, backendAddressPoolName)
-            }
-          ]
-          loadBalancerInboundNatRules: [
-            {
-              id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', loadBalancerName, inboundNatRulesName)
-            }
-          ]
         }
       }
     ]
   }
   dependsOn: [
     VNet
-    loadBalancer
   ]
 }
 
@@ -177,9 +86,6 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
   properties: {
     hardwareProfile: {
       vmSize: vmSize
-    }
-    availabilitySet: {
-      id: availabilitySet.id
     }
     osProfile: {
       computerName: virtualMachineName
@@ -222,9 +128,6 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
       ]
     }
   }
-  dependsOn: [
-    loadBalancer
-  ]
 }
 
 resource createADForest 'Microsoft.Compute/virtualMachines/extensions@2022-08-01' = {
