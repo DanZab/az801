@@ -80,8 +80,8 @@ Read and understand the protections applied to the group: [Protected Users Secur
 1. Identify two users that do not have any admin permissions currently. (Open the user in AD and look at "Member Of" tab, if it's empty the users do not have any permissions.)
 2. Create a user in the Resources OU called "Service Account" or something similar. This will emulate a user being used as a service account.
 3. Create two groups
-  1. Name the first group to indicate it will be used for "Password Reset" permissions
-  2. Name the second group to indicate it will be used for "Create and Manage Groups" permissions
+    1. Name the first group to indicate it will be used for "Password Reset" permissions
+    2. Name the second group to indicate it will be used for "Create and Manage Groups" permissions
 4. Add the first user from Step 1 to the password reset group, add the second user from step 1 to the Create/Manage Groups group.
 5. On the People OU in Active Directory, delegate permissions for password reset to the first group
 6. On one of the **SUB** OUs under the Groups OU, delegate permissions to Create and Manage Groups. **Do not delegate them on the base "Groups" OU**.
@@ -101,8 +101,8 @@ Read and understand the protections applied to the group: [Protected Users Secur
 6. Restart both servers
 7. Create an Authentication Policy that sets the TGT lifetime for Users to 120 minutes
 8. Create an Authentication Policy Silo (make sure it's set to enforced).
-  1. Add the users you identified in Step 1, and the Domain Controller computer object.
-  2. Select the Authentication Policy you created in Step 7
+   1. Add the users you identified in Step 1, and the Domain Controller computer object.
+   2. Select the Authentication Policy you created in Step 7
 9. Go back to the Authentication Policy you create in Step 7 and set the condition under "User Sign On" to only apply if the `User.AuthenticationSilo Equals (your Silo name from step 8)`.
 9. Link the Authentication Policy Silo to each user and the domain controller you selected in Step 8-1 
 10. Disconnect from your RDP session to the Management server and attempt to log in using one of the users from Step 1. This should be now be blocked due to the Auth Silo.
