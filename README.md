@@ -4,7 +4,7 @@ This repo contains the scripts and deployment files I use to manage the lab envi
 
 ## Contents
 
-## Guided Labs
+### Guided Labs
 The [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) page is in progress, but contains some walkthroughs you can use as you're studying for the AZ-801 to teach yourself the exam objectives.
 
 ### Configuration Scripts
