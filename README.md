@@ -13,7 +13,10 @@ The [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) page 
 - **Management** contains a script to install a set of RSAT tools on the management server so it can be used to manage other lab elements
 
 ### Lab Setup
-This directory contains files that can be used to deploy a lab environment in Azure. By default it includes an AD domain controller and a management server, it can be customized to modify the domain settings and to deploy multiple member servers.
+The [Lab Setup] section contains content you can use to quickly deploy an Active Directory lab environment in your Azure tenant using Terraform. Video walkthroughs about how to deploy the environment can be found here: [Instant Active Directory Lab in Azure: Step-by-Step (Part 2)](https://youtu.be/dlGQxzPiXsk).
 
-This requires that you have deployed the [Microsoft AD Quickstart](https://learn.microsoft.com/en-us/samples/azure/azure-quickstart-templates/active-directory-new-domain/) template once, and then you can use that to create a template spec that this terraform deployment uses.
+This deploys the following environment by default:
+
+![AD Lab Environment](diagram.png)
+
 
