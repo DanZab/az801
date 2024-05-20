@@ -7,10 +7,6 @@ This repo contains the scripts and deployment files I use to manage the lab envi
 ### Guided Labs
 The [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs) page is in progress, but contains some walkthroughs you can use as you're studying for the AZ-801 to teach yourself the exam objectives.
 
-### Configuration Scripts
-- **Active Directory** contains a script you can use to populate a blank AD domain. It creates OUs, Groups, Users and some default GPOs
-- **Failover Clusters** contains a script to configure a server as a host for iSCSI drives and then a second that can be used on your nodes to connect to them
-- **Management** contains a script to install a set of RSAT tools on the management server so it can be used to manage other lab elements
 
 ### Lab Setup
 The [Lab Setup](https://github.com/DanZab/az801/tree/main/Lab%20Setup) section contains content you can use to quickly deploy an Active Directory lab environment in your Azure tenant using Terraform. Video walkthroughs about how to deploy the environment can be found here: [Instant Active Directory Lab in Azure: Step-by-Step (Part 2)](https://youtu.be/dlGQxzPiXsk).
@@ -18,5 +14,11 @@ The [Lab Setup](https://github.com/DanZab/az801/tree/main/Lab%20Setup) section c
 This deploys the following environment by default:
 
 ![AD Lab Environment](diagram.png)
+
+### Active Directory
+This directory contains files that are referenced by DSC to configure the domain if you are using the Lab Setup. It also contains a script that can be customized to configure a blank AD domain if you are using the Microsoft Quickstart template: [Create an Azure VM with a new AD Forest - Code Samples | Microsoft Learn](https://learn.microsoft.com/en-us/samples/azure/azure-quickstart-templates/active-directory-new-domain/)
+
+### Scripts
+The [Scripts](https://github.com/DanZab/az801/tree/main/Scripts) directory contains some individual powershell scripts that may be needed for some of the [Guided Labs](https://github.com/DanZab/az801/tree/main/Guided%20Labs).
 
 
